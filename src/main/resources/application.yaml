@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: CloathingStore
+  profiles:
+    active: dev

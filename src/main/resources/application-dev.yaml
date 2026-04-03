@@ -1,0 +1,40 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/cloth_app
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      maximum-pool-size: 50         # depends on your DB capacity
+      minimum-idle: 10
+      idle-timeout: 300000          # 5 minutes
+      connection-timeout: 30000     # 30 seconds max to wait for a connection
+      max-lifetime: 1800000         # 30 minutes, recycle connections
+      leak-detection-threshold: 20000 # logs if a connection is not returned in 20s
+      pool-name: ProdHikariPool
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        # You can add other Hibernate properties here if needed
+        format_sql: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+security:
+  jwt:
+    secret-key: ${SECRETKEY}           # fixed typo from 'secretykey'
+    issuer: ${ISSUER}
+    access-ttl: ${ACCESS_TTL:900000}    # default 15 minutes
+    refresh-ttl: ${REFRESH_TTL:604800000} # default 7 days
+    refresh-token-cookie-name: ${REFRESHTOKEN_COOKIE_NAME:RefreshToken}
+    cookie-secure: ${COOKIE_SECURE:true}
+    cookie-http-only: ${COOKIE_HTTP_ONLY:true}
+    cookie-same-site: ${COOKIE_SAME_SITE:lax}

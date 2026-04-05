@@ -1,5 +1,6 @@
 package com.spring.CloathingStore.service;
 
+import com.spring.CloathingStore.model.UserPrinciple;
 import com.spring.CloathingStore.model.Users;
 import com.spring.CloathingStore.repo.UserRepo;
 import lombok.AllArgsConstructor;

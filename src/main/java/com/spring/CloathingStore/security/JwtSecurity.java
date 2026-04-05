@@ -78,7 +78,7 @@ public class JwtSecurity {
         Claims c = prase(token).getBody();
         return "refreshtoken".equals(c.get("typ"));
     }
-    public String userId(String token){
+    public String getuserId(String token){
          Claims c = prase(token).getBody();
          return c.getSubject();
     }

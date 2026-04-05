@@ -12,7 +12,7 @@ import java.util.Collections;
 
 public class UserPrinciple  implements UserDetails {
     private Users user;
-    UserPrinciple(Users user){
+    public UserPrinciple(Users user){
         this.user= user;
     }
     @Override

@@ -34,7 +34,8 @@ security:
     issuer: ${ISSUER}
     access-ttl: ${ACCESS_TTL:900000}    # default 15 minutes
     refresh-ttl: ${REFRESH_TTL:604800000} # default 7 days
-    refresh-token-cookie-name: ${REFRESHTOKEN_COOKIE_NAME:RefreshToken}
+    refresh-token-cookie-name: ${REFRESH_TOKEN_COOKIE_NAME:RefreshToken}
     cookie-secure: ${COOKIE_SECURE:true}
     cookie-http-only: ${COOKIE_HTTP_ONLY:true}
     cookie-same-site: ${COOKIE_SAME_SITE:lax}
+    domain-name: ${DOMAIN_NAME:localhost}

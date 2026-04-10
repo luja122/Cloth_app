@@ -10,16 +10,21 @@ import com.spring.CloathingStore.exception.RoleNotFoundException;
 import com.spring.CloathingStore.exception.UserNotEnable;
 import com.spring.CloathingStore.exception.UserNotFoundException;
 import com.spring.CloathingStore.model.RefreshToken;
+import com.spring.CloathingStore.model.RefreshTokenRequest;
 import com.spring.CloathingStore.model.Role;
 import com.spring.CloathingStore.model.Users;
 import com.spring.CloathingStore.repo.RefreshtokenRepo;
 import com.spring.CloathingStore.repo.RoleRepo;
 import com.spring.CloathingStore.repo.UserRepo;
 import com.spring.CloathingStore.security.JwtSecurity;
+import jakarta.servlet.Filter;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,6 +33,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -48,6 +55,8 @@ public class AuthServiceImpl implements AuthService{
     private CookieService cookieService;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private Filter filter;
 
     @Override
     public String register(Userdto data) {
@@ -61,12 +70,13 @@ public class AuthServiceImpl implements AuthService{
            user.setProvider(data.getProvider());
            user.setPassword( passwordEncoder.encode(data.getPassword()));
            userRepo.save(user);
-   return "Register Sucessfully";
+   return "Register Successfully";
        }else{
-           return "Register Unsucessfull";
+           return "Register Unsuccessfully";
        }
 
     }
+
 
     @Override
     public LoginResponse login(HttpServletResponse response, LoginRequest data) {
@@ -83,6 +93,53 @@ public class AuthServiceImpl implements AuthService{
        cookieService.attachRefreshtokenCookie(response,refreshtoken, (int)jwtSecurity.getRefresh_ttl());
        cookieService.addNoHeader(response);
        return new LoginResponse(refreshtoken,accesstoken,"",jwtSecurity.getAccess_ttl(), userMapper.user_to_UserDto(user));
+    }
+
+    @Override
+    public Optional<Object> readFromToken(HttpServletRequest request, RefreshTokenRequest body) {
+       if(request.getCookies()!=null){
+           Optional<String> fromCookie = Arrays.stream(request.getCookies())
+                   .filter(cookie -> cookie.getName().equals(cookieService.getRefreshTokenCookieName()))
+                   .map(Cookie::getValue)
+                   .filter(c->!c.isBlank())
+                   .findFirst();
+           if(fromCookie.isPresent()){
+               return Optional.of(fromCookie);
+           }
+       }
+       //get teh refresh token from the body
+        if(body!=null && body.refreshToken()!=null && !body.refreshToken().isBlank()){
+            return Optional.of(body.refreshToken());
+        }
+        //get refresn token from the header
+        String authheader = request.getHeader("X-Refreah_Token");
+        if(authheader!=null && !authheader.isBlank()){
+            return Optional.of(authheader);
+        }
+
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if(header!=null || header.regionMatches(true,0,"Bearer",0 ,6)){
+    String auth = authheader.substring(7);
+            if(auth!=null && !auth.isBlank()){
+                return Optional.of(auth);
+            }
+        }
+
+        return Optional.empty();
+
+    }
+
+    @Override
+    public Optional<?> readFromAccessToken(HttpServletRequest request) {
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if(header!=null&& header.regionMatches(true,0,"Bearer",0,6)){
+            String authheader = header.substring(7);
+            if(authheader!=null && !authheader.isBlank()){
+                return Optional.of(authheader);
+            }
+
+        }
+        return Optional.empty();
     }
 
 }

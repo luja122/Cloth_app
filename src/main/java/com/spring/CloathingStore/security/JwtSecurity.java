@@ -74,9 +74,18 @@ public class JwtSecurity {
        Claims c = prase(token).getBody();
        return "accesstoken".equals(c.get("typ"));
         }
+
     public boolean isRefreshToken(String token){
         Claims c = prase(token).getBody();
         return "refreshtoken".equals(c.get("typ"));
+    }
+    public boolean isExpired(String token){
+         Claims c = prase(token).getBody();
+         if(c.getExpiration().before(Date.from(Instant.now()))){
+             return true ;
+         }else {
+             return false;
+         }
     }
     public String getuserId(String token){
          Claims c = prase(token).getBody();
